@@ -3,13 +3,16 @@ import axios from "axios";
 import InputGroup from "../components/InputGroup";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import { useAuthDispatch } from "../context/auth";
+import { useAuthDispatch, useAuthState } from "../context/auth";
 
 const login = () => {
   const router = useRouter();
   const [email, set_email] = useState("");
   const [password, set_password] = useState("");
   const [errors, set_errors] = useState<any>({});
+  const { authenticated } = useAuthState();
+
+  if (authenticated) router.push('/');
 
   const dispatch = useAuthDispatch();
 
@@ -17,14 +20,10 @@ const login = () => {
     e.preventDefault();
 
     try {
-      const res = await axios.post(
-        "/auth/login",
-        {
-          email,
-          password,
-        },
-        { withCredentials: true }
-      );
+      const res = await axios.post("/auth/login", {
+        email,
+        password,
+      });
       dispatch("LOGIN", res.data?.user);
       router.push("/");
     } catch (e: any) {
