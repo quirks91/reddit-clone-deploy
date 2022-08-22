@@ -1,36 +1,35 @@
-import axios from 'axios';
+import axios from "axios";
 import Link from "next/link";
-import { useRouter } from 'next/router';
-import { FormEvent, useState } from "react";
+import { useRouter } from "next/router";
+import React, { FormEvent, useState } from "react";
 import InputGroup from "../components/InputGroup";
-import { useAuthState } from '../context/auth';
+import { useAuthState } from "../context/auth";
 
-const register = () => {
-	const router = useRouter();
-	const [email, set_email] = useState('');
-	const [username, set_username] = useState('');
-	const [password, set_password] = useState('');
-	const [errors, set_errors] = useState<any>({});
-	const { authenticated } = useAuthState();
+const Register = () => {
+  const [email, setEmail] = useState("");
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [errors, setErrors] = useState<any>({});
+  const { authenticated } = useAuthState();
 
-	if (authenticated) router.push('/');
+  let router = useRouter();
+  if (authenticated) router.push("/");
 
-	const handleSubmit = async (e: FormEvent) => {
-		e.preventDefault();
-
-		try {
-			const res = await axios.post('/auth/register', {
-				email,
-				username,
-				password,
-			})
-			console.log('res:', res);
-			router.push('/login')
-		} catch (e: any) {
-			console.log(e);
-			set_errors(e?.response?.data || {});
-		}
-	}
+  const handleSubmit = async (event: FormEvent) => {
+    event.preventDefault();
+    try {
+      const res = await axios.post("/auth/register", {
+        email,
+        password,
+        username,
+      });
+      console.log("res", res);
+      router.push("/login");
+    } catch (error: any) {
+      console.log("error", error);
+      setErrors(error.response.data || {});
+    }
+  };
 
   return (
     <div className="bg-white">
@@ -38,26 +37,26 @@ const register = () => {
         <div className="w-10/12 mx-auto md:w-96">
           <h1 className="mb-2 text-lg font-medium">회원가입</h1>
           <form onSubmit={handleSubmit}>
-						<InputGroup 
-							placeholder="Email"
-							value={email}
-							setValue={set_email}
-							error={errors.email}
-						/>
-						<InputGroup 
-							placeholder="Username"
-							value={username}
-							setValue={set_username}
-							error={errors.username}
-						/>
-						<InputGroup 
-							placeholder="Password"
-							value={password}
-							setValue={set_password}
-							error={errors.password}
-						/>
+            <InputGroup
+              placeholder="Email"
+              value={email}
+              setValue={setEmail}
+              error={errors.email}
+            />
+            <InputGroup
+              placeholder="Username"
+              value={username}
+              setValue={setUsername}
+              error={errors.username}
+            />
+            <InputGroup
+              placeholder="Password"
+              value={password}
+              setValue={setPassword}
+              error={errors.password}
+            />
             <button className="w-full py-2 mb-1 text-xs font-bold text-white uppercase bg-gray-400 border border-gray-400 rounded">
-              회원가입
+              회원 가입
             </button>
           </form>
           <small>
@@ -72,4 +71,4 @@ const register = () => {
   );
 };
 
-export default register;
+export default Register;

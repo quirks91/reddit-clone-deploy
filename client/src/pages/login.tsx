@@ -1,34 +1,35 @@
 import React, { FormEvent, useState } from "react";
-import axios from "axios";
 import InputGroup from "../components/InputGroup";
 import Link from "next/link";
+import axios from "axios";
 import { useRouter } from "next/router";
 import { useAuthDispatch, useAuthState } from "../context/auth";
 
-const login = () => {
-  const router = useRouter();
-  const [email, set_email] = useState("");
-  const [password, set_password] = useState("");
-  const [errors, set_errors] = useState<any>({});
+const Login = () => {
+  let router = useRouter();
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [errors, setErrors] = useState<any>({});
   const { authenticated } = useAuthState();
-
-  if (authenticated) router.push('/');
-
   const dispatch = useAuthDispatch();
 
-  const handleSubmit = async (e: FormEvent) => {
-    e.preventDefault();
+  if (authenticated) router.push("/");
 
+  const handleSubmit = async (event: FormEvent) => {
+    event.preventDefault();
     try {
-      const res = await axios.post("/auth/login", {
-        email,
-        password,
-      });
+      const res = await axios.post(
+        "/auth/login",
+        { password, username },
+        { withCredentials: true }
+      );
+
       dispatch("LOGIN", res.data?.user);
+
       router.push("/");
-    } catch (e: any) {
-      console.log(e);
-      set_errors(e?.response?.data || {});
+    } catch (error: any) {
+      console.log(error);
+      setErrors(error.response?.data || {});
     }
   };
 
@@ -39,15 +40,15 @@ const login = () => {
           <h1 className="mb-2 text-lg font-medium">로그인</h1>
           <form onSubmit={handleSubmit}>
             <InputGroup
-              placeholder="Email"
-              value={email}
-              setValue={set_email}
-              error={errors.email}
+              placeholder="Username"
+              value={username}
+              setValue={setUsername}
+              error={errors.username}
             />
             <InputGroup
               placeholder="Password"
               value={password}
-              setValue={set_password}
+              setValue={setPassword}
               error={errors.password}
             />
             <button className="w-full py-2 mb-1 text-xs font-bold text-white uppercase bg-gray-400 border border-gray-400 rounded">
@@ -66,4 +67,4 @@ const login = () => {
   );
 };
 
-export default login;
+export default Login;

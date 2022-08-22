@@ -31,7 +31,7 @@ const Home: NextPage = () => {
 
   // 스크롤 내려서 observedPost 에 닿으면
   // 다음 페이지 포스트들을 가져오기 윟나 포스트 Id
-  const [observedPost, setObserverdPost] = useState('');
+  const [observedPost, setObservedPost] = useState('');
 
   const observeElement = (element: HTMLElement | null) => {
     if(!element) return;
@@ -49,14 +49,17 @@ const Home: NextPage = () => {
   }
   // Infinite Scroll
   useEffect(() => {
+    // 포스트가 없다면 return 
     if (!posts || posts.length === 0) return;
+    // posts 배열안에 마지막 post에 id를 가져옵니다.
     const id = posts[posts.length - 1].identifier;
-
-    if(id !== observedPost) {
-      setObserverdPost(id);
+    // posts 배열에 post가 추가돼서 마지막 post가 바뀌었다면
+    // 바뀐 post 중 마지막post를 obsevedPost로 
+    if (id !== observedPost) {
+      setObservedPost(id);
       observeElement(document.getElementById(id));
     }
-  }, [posts]);
+  }, [posts])
 
 
   return (
