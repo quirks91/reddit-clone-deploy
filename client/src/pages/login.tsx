@@ -7,7 +7,7 @@ import { useAuthDispatch, useAuthState } from "../context/auth";
 
 const Login = () => {
   let router = useRouter();
-  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [errors, setErrors] = useState<any>({});
   const { authenticated } = useAuthState();
@@ -20,7 +20,7 @@ const Login = () => {
     try {
       const res = await axios.post(
         "/auth/login",
-        { password, username },
+        { password, email },
         { withCredentials: true }
       );
 
@@ -40,9 +40,9 @@ const Login = () => {
           <h1 className="mb-2 text-lg font-medium">로그인</h1>
           <form onSubmit={handleSubmit}>
             <InputGroup
-              placeholder="Username"
-              value={username}
-              setValue={setUsername}
+              placeholder="Email"
+              value={email}
+              setValue={setEmail}
               error={errors.username}
             />
             <InputGroup
