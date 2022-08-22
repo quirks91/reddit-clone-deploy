@@ -7,6 +7,9 @@ import cookieParser from 'cookie-parser';
 // routes
 import authRoutes from "./routes/auth";
 import subsRoutes from './routes/subs';
+import postRoutes from './routes/post';
+import voteRoutes from './routes/votes';
+import userRoutes from './routes/users';
 
 const app = express();
 const origin = "http://localhost:3000";
@@ -20,12 +23,16 @@ app.use(
 app.use(express.json());
 app.use(morgan("dev"));
 app.use(cookieParser())
+app.use(express.static('public'))
 
 dotenv.config();
 
 app.get("/", (_, res) => res.send("running"));
 app.use("/api/auth", authRoutes);
 app.use("/api/subs", subsRoutes);
+app.use('/api/posts', postRoutes);
+app.use('/api/votes', voteRoutes);
+app.use('/api/users', userRoutes);
 
 let port = 4000;
 
