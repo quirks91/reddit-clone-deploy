@@ -4,6 +4,7 @@ import authMiddleware from "../middlewares/auth";
 import Sub from "../entities/Sub";
 import Post from "../entities/Post";
 import Comment from "../entities/Comment";
+import { AppDataSource } from "../data-source";
 
 const getPosts = async (req: Request, res: Response) => {
   const currentPage: number = (req.query.page || 0) as number;
@@ -14,11 +15,11 @@ const getPosts = async (req: Request, res: Response) => {
     // skip 받아온 부분 스킵
     // take 몇개를 받아올 지
     const posts = await Post.find({
-      order: { createdAt: 'DESC' },
-      relations: ['sub', 'votes', 'comments'],
+      order: { createdAt: "DESC" },
+      relations: ["sub", "votes", "comments"],
       skip: currentPage * perPage,
       take: perPage,
-    })
+    });
 
     if (res.locals.user) {
       posts.forEach((p) => p.setUserVote(res.locals.user));
@@ -27,35 +28,59 @@ const getPosts = async (req: Request, res: Response) => {
     return res.json(posts);
   } catch (e) {
     console.log(e);
-    return res.status(500).json({ e: '문제가 발생했습니다.' })
+    return res.status(500).json({ e: "문제가 발생했습니다." });
   }
-}
+};
+
+const getSearchPosts = async (req: Request, res: Response) => {
+  console.log("REQ:", req.query.q);
+
+  try {
+    const posts = await AppDataSource.getRepository(Post)
+      .createQueryBuilder('post')
+      .select()
+      .leftJoinAndSelect('post.sub', 'sub')
+      .leftJoinAndSelect('post.votes', 'votes')
+      .leftJoinAndSelect('post.comments', 'comments')
+      .where("post.title ILIKE :searchQuery", { searchQuery: `%${req.query.q}%` })
+      .getMany();
+
+    if (res.locals.user) {
+      posts.forEach((p) => p.setUserVote(res.locals.user));
+    }
+
+    return res.json(posts);
+  } catch (e) {
+    console.log(e);
+    return res.status(500).json({ e: "문제가 발생했습니다." });
+  }
+};
 
 const getPost = async (req: Request, res: Response) => {
   const { identifier, slug } = req.params;
 
   try {
     const post = await Post.findOneOrFail({
-      where: { identifier, slug},
-      relations: ['sub', 'votes']
+      where: { identifier, slug },
+      relations: ["sub", "votes"],
     });
 
-    if(res.locals.user) {
+    if (res.locals.user) {
       post.setUserVote(res.locals.user);
     }
-  
-    return res.send(post)
+
+    return res.send(post);
   } catch (e) {
     console.log(e);
-    return res.status(404).json({ e: '게시물을 찾을 수 없습니다. '})
+    return res.status(404).json({ e: "게시물을 찾을 수 없습니다. " });
   }
-}
+};
 
 const createPost = async (req: Request, res: Response) => {
   const { title, body, sub } = req.body;
 
-  if(title.trim() === '') {
-    return res.status(400).json({ title: '제목은 비워둘 수 없습니다. '});
+  if (title.trim() === "") {
+    return res.status(400).json({ title: "제목은 비워둘 수 없습니다. " });
   }
 
   const user = res.locals.user;
@@ -72,11 +97,11 @@ const createPost = async (req: Request, res: Response) => {
     await post.save();
 
     return res.json(post);
-  } catch(e) {
+  } catch (e) {
     console.log(e);
-    return res.status(500).json({ e: '문제가 발생했습니다. '});
+    return res.status(500).json({ e: "문제가 발생했습니다. " });
   }
-}
+};
 
 const createPostComment = async (req: Request, res: Response) => {
   const { identifier, slug } = req.params;
@@ -89,7 +114,7 @@ const createPostComment = async (req: Request, res: Response) => {
     comment.user = res.locals.user;
     comment.post = post;
 
-    if(res.locals.user) {
+    if (res.locals.user) {
       post.setUserVote(res.locals.user);
     }
 
@@ -97,12 +122,11 @@ const createPostComment = async (req: Request, res: Response) => {
     return res.json(comment);
   } catch (e) {
     console.log(e);
-    return res.status(404).json({ e: '게시물을 찾을 수 없습니다. '});
+    return res.status(404).json({ e: "게시물을 찾을 수 없습니다. " });
   }
-}
+};
 
 const getPostComments = async (req: Request, res: Response) => {
-  console.log('@@@@@@@@@@@@@@@@@@@@@@@@@@@@')
   const { identifier, slug } = req.params;
   try {
     const post = await Post.findOneByOrFail({ identifier, slug });
@@ -123,10 +147,11 @@ const getPostComments = async (req: Request, res: Response) => {
 
 const router = Router();
 
-router.get('/', userMiddleware, getPosts);
-router.get('/:identifier/:slug', userMiddleware, getPost)
-router.post('/', userMiddleware, authMiddleware, createPost);
-router.post('/:identifiter/:slug/comments', userMiddleware, createPostComment)
-router.get('/:identifier/:slug/comments', userMiddleware, getPostComments);
+router.get("/", userMiddleware, getPosts);
+router.get("/search", userMiddleware, getSearchPosts);
+router.get("/:identifier/:slug", userMiddleware, getPost);
+router.post("/", userMiddleware, authMiddleware, createPost);
+router.post("/:identifiter/:slug/comments", userMiddleware, createPostComment);
+router.get("/:identifier/:slug/comments", userMiddleware, getPostComments);
 
 export default router;
