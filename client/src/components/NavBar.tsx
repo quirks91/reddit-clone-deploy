@@ -1,22 +1,52 @@
 import axios from "axios";
 import Image from "next/image";
 import Link from "next/link";
+import { Dispatch, SetStateAction } from "react";
 import { FaSearch } from "react-icons/fa";
 import { useAuthDispatch, useAuthState } from "../context/auth";
 
-const NavBar: React.FC = () => {
+interface NavBarProps {
+  searchPost?: string;
+  setSearchPost: Dispatch<SetStateAction<string>>;
+  setSearchPosts?: Dispatch<SetStateAction<any>>;
+  search: boolean;
+}
+
+const NavBar = ({
+  searchPost,
+  setSearchPost,
+  setSearchPosts,
+  search,
+}: NavBarProps) => {
   const { loading, authenticated } = useAuthState();
   const dispatch = useAuthDispatch();
 
+  const searchPosts = async () => {
+    const text = searchPost?.trim();
+    const result = await axios.get(`/posts/search`, {
+      params: { q: text },
+    });
+    if (setSearchPosts) {
+      setSearchPosts(result.data);
+    }
+  };
+
   const handleLogout = () => {
-    axios.post('/auth/logout')
+    axios
+      .post("/auth/logout")
       .then(() => {
-        dispatch("LOGOUT"); 
+        dispatch("LOGOUT");
         window.location.reload();
       })
       .catch((e) => {
         console.log(e);
       });
+  };
+
+  const onKeyDown = (e: any) => {
+    if (e.key === "Enter") {
+      searchPosts();
+    }
   };
 
   return (
@@ -34,14 +64,19 @@ const NavBar: React.FC = () => {
         </Link>
       </span>
       <div className="max-w-full px-4">
-        <div className="relative flex items-center bg-gray-100 border rounded hover:border-gray-700 hover:bg-white">
-          <FaSearch className="ml-2 text-gray-400" />
-          <input
-            type="text"
-            placeholder="Search Reddit"
-            className="px-3 py-1 bg-transparent rounded h-7 focus:outline-none"
-          />
-        </div>
+        {search && (
+          <div className="relative flex items-center bg-gray-100 border rounded hover:border-gray-700 hover:bg-white">
+            <FaSearch className="ml-2 text-gray-400" />
+            <input
+              type="text"
+              placeholder="Search Reddit"
+              className="px-3 py-1 bg-transparent rounded h-7 focus:outline-none"
+              value={searchPost}
+              onChange={(e) => setSearchPost(e.target.value)}
+              onKeyDown={onKeyDown}
+            />
+          </div>
+        )}
       </div>
 
       <div className="flex">
