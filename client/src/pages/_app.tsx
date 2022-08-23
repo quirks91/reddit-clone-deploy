@@ -9,7 +9,7 @@ import Head from "next/head";
 
 function MyApp({ Component, pageProps }: AppProps) {
   const { pathname } = useRouter();
-  const authRoutes = ["/login", "/register"];
+  const authRoutes = ["/login", "/register", '/'];
   const authRoute = authRoutes.includes(pathname);
   axios.defaults.baseURL = process.env.NEXT_PUBLIC_SERVER_BASE_URL + "/api";
   axios.defaults.withCredentials = true;
@@ -39,8 +39,8 @@ function MyApp({ Component, pageProps }: AppProps) {
         }}
       >
         <AuthProvider>
-          {!authRoute && <NavBar />}
-          <div className={authRoute ? "" : "pt-12 bg-gray-200 min-h-screen"}>
+          {!authRoute && <NavBar setSearchPost={() => console.log()} search={false} />}
+          <div className={"pt-12 bg-gray-200 min-h-screen"}>
             <Component {...pageProps} />
           </div>
         </AuthProvider>
