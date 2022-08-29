@@ -60,21 +60,18 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   useEffect(() => {
-    dispatch("STOP_LOADING");
-  }, [])
-  // useEffect(() => {
-  //   async function loadUser() {
-  //     try {
-  //       const res = await axios.get("/auth/me");
-  //       dispatch("LOGIN", res.data);
-  //     } catch (error) {
-  //       console.log(error);
-  //     } finally {
-  //       dispatch("STOP_LOADING");
-  //     }
-  //   }
-  //   loadUser();
-  // }, []);
+    async function loadUser() {
+      try {
+        const res = await axios.get("/auth/me");
+        dispatch("LOGIN", res.data);
+      } catch (error) {
+        console.log(error);
+      } finally {
+        dispatch("STOP_LOADING");
+      }
+    }
+    loadUser();
+  }, []);
 
   return (
     <DispatchContext.Provider value={dispatch}>
