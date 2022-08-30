@@ -9,7 +9,7 @@ import Head from "next/head";
 
 function MyApp({ Component, pageProps }: AppProps) {
   const { pathname } = useRouter();
-  const authRoutes = ["/login", "/register", '/'];
+  const authRoutes = ["/login", "/register", "/"];
   const authRoute = authRoutes.includes(pathname);
   axios.defaults.baseURL = process.env.NEXT_PUBLIC_SERVER_BASE_URL + "/api";
   axios.defaults.withCredentials = true;
@@ -32,6 +32,10 @@ function MyApp({ Component, pageProps }: AppProps) {
           integrity="sha384-xBXmu0dk1bEoiwd71wOonQLyH+VpgR1XcDH3rtxrLww5ajNTuMvBdL5SOiFZnNdp"
           crossOrigin="anonymous"
         ></script>
+        <meta
+          httpEquiv="Content-Security-Policy"
+          content="upgrade-insecure-requests"
+        />
       </Head>
       <SWRConfig
         value={{
@@ -39,7 +43,9 @@ function MyApp({ Component, pageProps }: AppProps) {
         }}
       >
         <AuthProvider>
-          {!authRoute && <NavBar setSearchPost={() => console.log()} search={false} />}
+          {!authRoute && (
+            <NavBar setSearchPost={() => console.log()} search={false} />
+          )}
           <div className={"pt-12 bg-gray-200 min-h-screen"}>
             <Component {...pageProps} />
           </div>
